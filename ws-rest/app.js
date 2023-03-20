@@ -2,8 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Sequelize = require('sequelize');
-const defineModel = require('./model.js');
-
+const { defineModel } = require('./model.js');
 
 const service = express();
 
@@ -16,31 +15,57 @@ const sequelize = new Sequelize('dati-sequelize', 'utente', 'cisco', {
     dialect: 'mysql'
 });
 
-defineModel(sequelize);
+const { Student, Grade } = defineModel(sequelize);
 
 service.get('', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-service.get('/test-connection-1', (req, res) => {
-    (async () => {
-        try {
-            await sequelize.authenticate();
-            res.status(200).send('Connection has been established successfully.')
-          } catch (error) {
-            res.status(500).send(error);
-          }
-    })();
+service.get('/test-connection/:mode', (req, res) => {
+    let mode = req.params.mode;
+    switch (mode) {
+        case '1':
+            (async () => {
+                try {
+                    await sequelize.authenticate();
+                    res.status(200).send('Connection has been established successfully.')
+                } catch (error) {
+                    res.status(500).send(error);
+                }
+            })();
+            break;
+        case '2':
+            sequelize.authenticate()
+                .then(() => {
+                    res.status(200).send('Connection has been established successfully.')
+                })
+                .catch((error) => {
+                    res.status(500).send(error);
+                })
+            break;
+        default:
+            break;
+    }
 });
 
-service.get('/test-connection-2', (req, res) => {
-    sequelize.authenticate()
-        .then(() => {
-            res.status(200).send('Connection has been established successfully.')
-        })
-        .catch((error) => {
-            res.status(500).send(error);
-        })
+service.get('/init-db/:mode', (req, res) => {
+    let mode = req.params.mode;
+    switch (mode) {
+        case '0':
+            // sync()
+            console.log(Student, Grade);
+            res.status(200).send('Test mode.')
+            break;
+        case '1':
+            // sync(force)
+            break;
+        case '2':
+            // sync(alter)
+            break;
+    
+        default:
+            break;
+    }
 })
 
 const server = service.listen(3000, () => {
