@@ -1,14 +1,18 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
-function defineModel(sequelize) {
+const sequelize = new Sequelize('dati-sequelize', 'utente', 'cisco', {
+    host: 'sql-progetto-sequelize',
+    dialect: 'mysql'
+});
 
-    const Student = sequelize.define('Student', {
+var model = {
+    Student: sequelize.define('Student', {
         // Model attributes are defined here
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
-        },        
+        },
         firstName: {
             type: DataTypes.STRING,
             allowNull: false
@@ -25,15 +29,14 @@ function defineModel(sequelize) {
         },
     }, {
         // Other model options go here
-    });
-
-    const Grade = sequelize.define('Grade', {
+    }),
+    Grade: sequelize.define('Grade', {
         // Model attributes are defined here
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true
-        },        
+        },
         subject: {
             type: DataTypes.STRING,
             allowNull: false
@@ -50,16 +53,13 @@ function defineModel(sequelize) {
         },
     }, {
         // Other model options go here
-    });
-
-    console.log(Student, Grade);
-
-    Student.hasMany(Grade);
-    Grade.belongsTo(Student);
-
-    return {
-        Student, Grade
-    };
+    })
 }
 
-module.exports = { defineModel }
+model.Student.hasMany(model.Grade);
+model.Grade.belongsTo(model.Student);
+
+module.exports = {
+    sequelize,
+    model
+}
